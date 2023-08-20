@@ -1,11 +1,6 @@
 (ns hanoi.core
   (:gen-class))
 
-(defn -main
-  "I don't do a whole lot ... yet."
-  [& args]
-  (println "Hello, World!"))
-
 (defn make-tower [size]
   (letfn [(make-tower-iter [size acc]
             (if (zero? size)
@@ -36,80 +31,13 @@
        (println new-state)
        new-state))))
 
-(defn all-but-last [list]
-  (reverse (rest (reverse list))))
+(defn hanoi-move-seq [count src dest intermediate]
+  (if (> count 0)
+    (concat
+      (hanoi-move-seq (- count 1) src intermediate dest)
+      `((move ~src ~dest))
+      (hanoi-move-seq (- count 1) intermediate dest src))
+    '()))
 
-(def debug false)
-
-(defn hanoi
-  ([count src dest intermediate]
-   (if (> count 0)
-     (do
-       (hanoi
-         (- count 1)
-         src intermediate dest)
-       (move src dest)
-       (hanoi
-         (- count 1)
-         intermediate dest src)
-       )
-     ))
-  ([]
-   (hanoi (count (first board))
-          0 2 1)))
-
-(defn hanoi-old
-  ([board src-index dest-index intermediate-index src-tower dest-tower intermediate-tower indent]
-   (let [top-src-tower (all-but-last src-tower)]
-     (cond
-       debug
-       (println
-         (format "src-index: %s\ndest-index: %s\nintermediate-index: %s\nsrc-tower: %s\ndest-tower: %s\nintermediate-tower: %s\n\n"
-                 src-index dest-index intermediate-index src-tower dest-tower intermediate-tower)))
-     (cond
-       (> (count src-tower) 0)
-       (do
-         (hanoi-old board
-                    src-index dest-index intermediate-index
-                    top-src-tower intermediate-tower dest-tower)
-
-         (hanoi-old (move src-index dest-index board)
-                    intermediate-index dest-index src-index
-                    top-src-tower (nth board dest-index) intermediate-tower)
-         )
-
-       true board
-       )))
-
-  ([board src-index dest-index intermediate-index src-tower dest-tower intermediate-tower]
-   (hanoi-old board
-              src-index
-              dest-index
-              intermediate-index
-              src-tower
-              dest-tower
-              intermediate-tower
-              "")
-   )
-
-  ([board src-index dest-index intermediate-index]
-   (hanoi-old board
-              src-index
-              dest-index
-              intermediate-index
-              (nth board src-index)
-              (nth board dest-index)
-              (nth board intermediate-index))
-   )
-
-  ([src-index dest-index intermediate-index]
-   (hanoi-old board
-              src-index
-              dest-index
-              intermediate-index
-              (nth board src-index)
-              (nth board dest-index)
-              (nth board intermediate-index))
-   )
-  ([]
-   (hanoi-old 0 1 2)))
+(defmacro hanoi [count src dest intermediate]
+  `(->> board ~@(hanoi-move-seq count src dest intermediate)))
