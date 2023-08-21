@@ -94,7 +94,10 @@
                          (hanoi-move-seq count
                                          src dest intermediate))
                   ))
-          )))))
+          ))))
+  ;; Default src, dest, and intermediate
+  ([count]
+   `(accumulating-hanoi ~count 0 2 1)))
 
 ;; So, what if I really don't want to have to pass 'count'? Well, I generate a lisp expression that is a macro call
 ;; and then evaluate it. I would argue that this is an "ok" use of eval since I'm evaluating all arguments to the
