@@ -80,19 +80,21 @@
 ;; Instead of logging the different board states, accumulate them!
 (defmacro accumulating-hanoi
   ([count src dest intermediate]
-   (let [board (gensym)]
+   (let [board-state (gensym)]
      `(binding [*log-moves* false]
         (:state-accumulator
-          (as-> {:board (quote [~(make-tower count) () ()]) :state-accumulator '()} ~board
-                ~@(map (fn [x]
-                         `(let [new-state# ~(concat x `((:board ~board)))]
-                            (assoc ~board
-                              :board new-state#
-                              :state-accumulator (concat (:state-accumulator ~board)
-                                                         `(~new-state#)))))
-                       (hanoi-move-seq count
-                                       src dest intermediate))
-                ))))))
+          (let [board# (quote [~(make-tower count) () ()])]
+            (as-> {:board board# :state-accumulator `(~board#)} ~board-state
+                  ~@(map (fn [x]
+                           `(let [new-state# ~(concat x `((:board ~board-state)))]
+                              (assoc ~board-state
+                                :board new-state#
+                                :state-accumulator (concat (:state-accumulator ~board-state)
+                                                           `(~new-state#)))))
+                         (hanoi-move-seq count
+                                         src dest intermediate))
+                  ))
+          )))))
 
 ;; So, what if I really don't want to have to pass 'count'? Well, I generate a lisp expression that is a macro call
 ;; and then evaluate it. I would argue that this is an "ok" use of eval since I'm evaluating all arguments to the
