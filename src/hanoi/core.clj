@@ -87,10 +87,9 @@
             (as-> {:board board# :state-accumulator `(~board#)} ~board-state
                   ~@(map (fn [x]
                            `(let [new-state# ~(concat x `((:board ~board-state)))]
-                              (assoc ~board-state
-                                :board new-state#
-                                :state-accumulator (concat (:state-accumulator ~board-state)
-                                                           `(~new-state#)))))
+                              {:board             new-state#
+                               :state-accumulator (concat (:state-accumulator ~board-state)
+                                                          `(~new-state#))}))
                          (hanoi-move-seq count
                                          src dest intermediate))
                   ))
